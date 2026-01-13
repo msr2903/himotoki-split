@@ -106,7 +106,7 @@ for tokens, score in results:
 ## 📊 Comparison
 
 | Feature | himotoki-split | himotoki (Full) |
-| :--- | :---: | :---: | :---: |
+| :--- | :---: | :---: |
 | **Dictionary Size** | ~27 MB | ~3 GB |
 | **Database Required** | No | Yes (SQLite) |
 | **Startup Time** | <1ms | ~500ms |
