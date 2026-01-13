@@ -1,0 +1,82 @@
+# --- Python Core ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# --- Environments ---
+.env
+.venv
+env/
+venv/
+ENV/
+*.bak
+
+# --- Build & Distribution ---
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Testing & Tooling ---
+.pytest_cache/
+.coverage
+.coverage.*
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+cython_debug/
+pytest_debug.log
+
+# --- IDE & OS ---
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+.kiro/
+
+# --- Project Specific Data ---
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+*.pgdump
+data/*.db
+data/*.sqlite
+data/JMdict_e.xml
+
+# --- Output Files ---
+# Generated reports and intermediate files (keep results.json for benchmarking)
+output/report.html
+output/mismatch.json
+output/partial.json
+output/results_counters.json
+
+# --- External Source ---
+ichiran-source-code/
+
+# --- Debug Scripts (at root level) ---
+debug_*.py
+check_*.py

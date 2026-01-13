@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "himotoki-split"
+version = "0.1.0"
+description = "Lightweight Python-based Japanese Tokenizer and Morphological Analyzer. Based on JMDict for Language Learning."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    {name = "Himotoki Contributors"}
+]
+keywords = ["japanese", "nlp", "morphological-analysis", "tokenizer", "splitter"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Natural Language :: Japanese",
+]
+
+dependencies = [
+    "lxml>=4.9.0",
+    "marisa-trie>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "hypothesis>=6.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+]
+build = [
+    "sqlalchemy>=2.0.0",  # Only needed for building dictionary from JMdict
+]
+
+[project.scripts]
+himotoki-split = "himotoki_split.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/msr2903/himotoki-split"
+Documentation = "https://github.com/msr2903/himotoki-split#readme"
+Repository = "https://github.com/msr2903/himotoki-split"
+Issues = "https://github.com/msr2903/himotoki-split/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["himotoki_split*"]
+exclude = ["scripts*", "tests*"]
+
+[tool.setuptools.package-data]
+himotoki_split = ["data/*.dic", "data/*.csv", "data/*.md"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310', 'py311', 'py312', 'py313']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov=himotoki --cov-report=term-missing"
