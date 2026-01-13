@@ -105,12 +105,12 @@ for tokens, score in results:
 
 ## 📊 Comparison
 
-| Feature | himotoki-split | himotoki (Full) | SudachiPy (Small) |
+| Feature | himotoki-split | himotoki (Full) |
 | :--- | :---: | :---: | :---: |
-| **Dictionary Size** | ~27 MB | ~3 GB | ~10 MB |
-| **Database Required** | No | Yes (SQLite) | No |
-| **Startup Time** | <1ms | ~500ms | ~50ms |
-| **Definitions**| IDs Only | Full Definitions | None |
+| **Dictionary Size** | ~27 MB | ~3 GB |
+| **Database Required** | No | Yes (SQLite) |
+| **Startup Time** | <1ms | ~500ms |
+| **Definitions**| IDs Only | Full Definitions |
 
 ---
 
