@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "himotoki-split"
+version = "0.1.0"
+description = "Lightweight Japanese split-only tokenizer distilled from Himotoki"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Himotoki Contributors" }]
+keywords = ["japanese", "nlp", "tokenizer", "segmentation", "himotoki"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Text Processing :: Linguistic",
+  "Natural Language :: Japanese",
+]
+dependencies = [
+  "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+train = [
+  "scikit-learn>=1.3.0",
+]
+teacher = [
+  "himotoki>=0.3.0",
+]
+dev = [
+  "pytest>=7.0.0",
+  "scikit-learn>=1.3.0",
+]
+
+[project.scripts]
+himotoki-split = "himotoki_split.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/msr2903/himotoki-split"
+Related = "https://github.com/msr2903/himotoki"
+
+[tool.setuptools.packages.find]
+include = ["himotoki_split*"]
+
+[tool.setuptools.package-data]
+himotoki_split = ["models/*.npz"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
