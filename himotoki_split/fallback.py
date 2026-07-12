@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, Sequence
+from typing import List, Sequence
 
 
 def himotoki_available() -> bool:
@@ -17,15 +17,12 @@ def himotoki_available() -> bool:
 def split_with_himotoki(text: str) -> List[str]:
     """Return top-path surface segments from Himotoki."""
     import himotoki
-    from himotoki.segment import segment_text
-    from himotoki.db.connection import get_session
 
-    session = get_session()
-    paths = segment_text(session, text, limit=1)
+    paths = himotoki.analyze(text, limit=1)
     if not paths:
         return [text] if text else []
-    segments, _score = paths[0]
-    return [seg.text for seg in segments]
+    words, _score = paths[0]
+    return [w.text for w in words]
 
 
 def dump_labels(

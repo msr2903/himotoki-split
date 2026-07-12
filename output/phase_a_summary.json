@@ -1,0 +1,27 @@
+{
+  "phase": "A",
+  "corpus_sentences": 100000,
+  "labeled_unique": 99997,
+  "train": 94997,
+  "holdout": 5000,
+  "linear_train_subset": 30000,
+  "linear_holdout": {
+    "boundary_f1": 0.9167,
+    "exact_seg": 0.1036,
+    "exact_count": 518,
+    "n": 5000
+  },
+  "onnx_train_subset": 5000,
+  "onnx_holdout": {
+    "boundary_f1": 0.8947,
+    "exact_seg": 0.062,
+    "exact_count": 310,
+    "n": 5000
+  },
+  "notes": [
+    "Wikipedia CC BY-SA derived silver labels; large JSONL kept local/gitignored",
+    "Linear model uses SGD (memory-safe); trained on 30k sample of train.jsonl",
+    "ONNX BiLSTM smoke-trained on 5k; scale epochs/data for Phase B quality",
+    "Exact-seg is low on wiki holdout due to long/noisy sentences; boundary F1 is the primary Phase A metric"
+  ]
+}

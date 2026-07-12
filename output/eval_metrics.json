@@ -1,0 +1,10 @@
+{
+  "n": 5000,
+  "backend": "linear",
+  "model": "himotoki_split/models/default.npz",
+  "holdout": "data/labels/holdout.jsonl",
+  "boundary_f1": 0.9169354301655832,
+  "exact_seg": 0.1056,
+  "mean_confidence": 0.912610726416111,
+  "exact_count": 528
+}

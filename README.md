@@ -8,7 +8,7 @@ Himotoki is a full morphological analyzer (dictionary + conjugations + meanings,
 | | Himotoki | himotoki-split |
 |--|----------|----------------|
 | Output | words + readings + POS + meanings | surface splits only |
-| Footprint | ~1.8 GB SQLite | ~MB model (numpy) |
+| Footprint | ~1.8 GB SQLite | ~KB–MB model |
 | Accuracy | gold / dictionary | approximates teacher |
 | Fallback | — | optional Himotoki on low confidence |
 
@@ -16,10 +16,10 @@ Himotoki is a full morphological analyzer (dictionary + conjugations + meanings,
 
 ```bash
 pip install -e .
-# training
-pip install -e ".[train]"
-# teacher / fallback (needs Himotoki + its DB)
-pip install -e ".[teacher]"
+pip install -e ".[train]"      # linear student training
+pip install -e ".[teacher]"    # Himotoki dump / fallback (needs DB)
+pip install -e ".[neural]"     # BiLSTM train + ONNX export
+pip install -e ".[onnx]"       # ONNX runtime only
 ```
 
 ## Usage
@@ -28,51 +28,84 @@ pip install -e ".[teacher]"
 from himotoki_split import split
 
 result = split("学校で勉強しています")
-print(result.segments)     # ['学校', 'で', ...]
-print(result.confidence)   # 0.0–1.0
-print(result.source)       # "model" or "himotoki"
+print(result.segments)
+print(result.confidence, result.source)
 ```
-
-CLI:
 
 ```bash
 himotoki-split "猫が食べる"
 himotoki-split --json "猫が食べる"
 ```
 
-## Distill from Himotoki
+## Scale silver labels (Wikipedia → Himotoki → train)
 
-1. Prepare sentences (one per line).
-2. Dump silver labels (requires Himotoki DB):
+Large dumps stay **local** (gitignored). Wikipedia text is **CC BY-SA**.
+
+### Phase A — 100k sentences + linear student
+
+```bash
+# 1) Build cleaned sentence list (streams dump until --target)
+python scripts/build_corpus.py --download --target 100000 -o data/corpus/sentences.txt
+# or: python scripts/build_corpus.py --dump /path/to/jawiki-latest-pages-articles.xml.bz2 --target 100000
+
+# 2) Shard for parallel labeling
+python scripts/shard_corpus.py -i data/corpus/sentences.txt -o data/corpus/shards --num-shards 8
+
+# 3) Dump Himotoki silver labels (requires Himotoki + DB; hours on one CPU)
+for i in $(seq 0 7); do
+  python scripts/dump_labels.py \
+    -i data/corpus/sentences.txt \
+    -o data/labels/shards/part-$(printf '%03d' $i).jsonl \
+    --shard-id $i --num-shards 8 --resume &
+done
+wait
+
+# 4) Merge + freeze 5k holdout
+python scripts/merge_labels.py -i data/labels/shards/*.jsonl \
+  --train-out data/labels/train.jsonl --holdout-out data/labels/holdout.jsonl
+
+# 5) Train linear model + eval
+python scripts/train.py -i data/labels/train.jsonl -o himotoki_split/models/default.npz
+python scripts/eval_model.py -m himotoki_split/models/default.npz -i data/labels/holdout.jsonl
+```
+
+Rough cost: wiki extract is large (multi-GB download if using full articles dump); labeling ~20–100 ms/sentence ⇒ **100k ≈ a few hours** single-threaded (faster with shards).
+
+### Phase B — 500k + neural ONNX student
+
+```bash
+python scripts/build_corpus.py --download --target 500000 -o data/corpus/sentences.txt
+# ... dump + merge as above ...
+python scripts/train_neural.py -i data/labels/train.jsonl -o himotoki_split/models/default.onnx --epochs 5
+python scripts/eval_model.py -m himotoki_split/models/default.onnx -i data/labels/holdout.jsonl --backend onnx
+```
+
+`split()` prefers `default.onnx` when present (and onnxruntime is installed), otherwise `default.npz`.
+
+## Small-scale distill (existing)
 
 ```bash
 python scripts/dump_labels.py -i data/sample_sentences.txt -o data/labels.jsonl
-```
-
-3. Train and overwrite the packaged model:
-
-```bash
 python scripts/train.py -i data/labels.jsonl -o himotoki_split/models/default.npz
 ```
 
-Shipped `default.npz` was trained on **559** Himotoki silver labels
-(`data/labels_himotoki510.jsonl` + samples): ~**0.86** held-out boundary F1
-(char B/I), logistic regression + Viterbi, numpy runtime (~8 KB).
+Shipped `default.npz` after Phase A: trained on a **30k** subset of ~**95k**
+Himotoki-labeled Wikipedia sentences (100k corpus → 99,997 labels → 5k holdout).
+Holdout boundary F1 ≈ **0.92**, exact-seg ≈ **10%** on noisy wiki text.
+Optional `default.onnx` (BiLSTM) is included as a Phase B starter (~0.89 F1 on same holdout after a 5k smoke train).
+
+Large artifacts (`data/corpus/`, `data/labels/train.jsonl`, wiki dumps) are **gitignored**.
 
 ## Design
 
-- **Teacher:** Himotoki `segment_text` top path → character B/I labels  
-- **Student:** logistic regression over character-script window features  
-- **Runtime:** numpy only (`default.npz`)  
-- **Fallback:** if model confidence &lt; threshold and Himotoki is installed, use Himotoki
-
-This is an MVP. Stronger students (BiLSTM/CRF → ONNX) can replace the classifier without changing the dump format or public `split()` API.
+- **Teacher:** Himotoki `segment_text` top path → `{text, segments}` JSONL  
+- **Student (default):** logistic regression + Viterbi (`default.npz`, numpy)  
+- **Student (optional):** char BiLSTM → ONNX  
+- **Fallback:** low-confidence → Himotoki if installed  
 
 ## Relationship to Himotoki
 
-- **Separate repository / package** on purpose — do not merge into core `himotoki`.
-- Himotoki remains the accurate analyzer and training teacher.
-- himotoki-split depends on Himotoki only as an optional extra.
+Separate repository on purpose. Himotoki remains the accurate analyzer and training teacher.
 
 ## License
 

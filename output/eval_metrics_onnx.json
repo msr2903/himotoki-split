@@ -1,0 +1,10 @@
+{
+  "n": 5000,
+  "backend": "onnx",
+  "model": "himotoki_split/models/default.onnx",
+  "holdout": "data/labels/holdout.jsonl",
+  "boundary_f1": 0.8947164184900059,
+  "exact_seg": 0.062,
+  "mean_confidence": 0.887242639374733,
+  "exact_count": 310
+}

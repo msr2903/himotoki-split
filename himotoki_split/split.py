@@ -6,11 +6,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Sequence, Union
 
-from himotoki_split.model import BoundaryModel, load_default_model, load_model
+from himotoki_split.model import load_default_model, load_model
 
 PathLike = Union[str, Path]
 
-_MODEL: Optional[BoundaryModel] = None
+_MODEL = None  # BoundaryModel | OnnxBoundaryModel
 
 
 @dataclass
@@ -22,11 +22,25 @@ class SplitResult:
     labels: List[int] = field(default_factory=list)
 
 
-def _get_model(model_path: Optional[PathLike] = None) -> BoundaryModel:
+def _get_model(model_path: Optional[PathLike] = None):
     global _MODEL
     if model_path is not None:
-        return load_model(model_path)
+        path = Path(model_path)
+        if path.suffix == ".onnx":
+            from himotoki_split.neural import OnnxBoundaryModel
+
+            return OnnxBoundaryModel.load(path)
+        return load_model(path)
     if _MODEL is None:
+        onnx_default = Path(__file__).resolve().parent / "models" / "default.onnx"
+        if onnx_default.is_file():
+            try:
+                from himotoki_split.neural import OnnxBoundaryModel
+
+                _MODEL = OnnxBoundaryModel.load(onnx_default)
+                return _MODEL
+            except Exception:
+                pass
         _MODEL = load_default_model()
     return _MODEL
 
@@ -47,7 +61,7 @@ def split(
 
     Args:
         text: Input sentence (no length hard-cap here; keep inputs reasonable).
-        model_path: Optional path to a ``.npz`` boundary model.
+        model_path: Optional path to a ``.npz`` or ``.onnx`` boundary model.
         fallback: If True and confidence < ``min_confidence``, try Himotoki.
         min_confidence: Threshold for accepting the distilled model output.
     """

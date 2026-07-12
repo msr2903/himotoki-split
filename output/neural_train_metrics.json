@@ -1,0 +1,9 @@
+{
+  "onnx_path": "himotoki_split/models/default.onnx",
+  "n_sentences": 5000,
+  "epochs": 2,
+  "emb_dim": 64,
+  "hidden": 128,
+  "train_boundary_f1": 0.8997262007860143,
+  "train_exact_seg": 0.069
+}

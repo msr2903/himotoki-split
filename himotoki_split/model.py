@@ -147,10 +147,11 @@ def train_boundary_model(
     C: float = 1.0,
     max_iter: int = 400,
     random_state: int = 0,
+    batch_sentences: int = 512,
 ) -> BoundaryModel:
-    """Train with scikit-learn LogisticRegression (optional train extra)."""
+    """Train with scikit-learn SGD (memory-safe for large corpora)."""
     try:
-        from sklearn.linear_model import LogisticRegression
+        from sklearn.linear_model import SGDClassifier
     except ImportError as exc:
         raise ImportError(
             "Training requires scikit-learn. Install with: "
@@ -158,29 +159,67 @@ def train_boundary_model(
         ) from exc
 
     labels = [segments_to_bio(t, segs) for t, segs in zip(texts, segments_list)]
-    x, y = featurize_corpus(texts, labels)
-    y_bin = (y == LABEL_B).astype(np.int64)
-    clf = LogisticRegression(
-        C=C,
-        max_iter=max_iter,
+    # Estimate class balance from a sample
+    sample_y = []
+    for lab in labels[: min(len(labels), 5000)]:
+        sample_y.extend(lab)
+    sample_y_arr = np.asarray(sample_y, dtype=np.int64)
+    n_b = int((sample_y_arr == LABEL_B).sum())
+    n_i = int((sample_y_arr == LABEL_I).sum())
+    # weight inversely proportional to frequency
+    w_b = (n_b + n_i) / (2 * max(n_b, 1))
+    w_i = (n_b + n_i) / (2 * max(n_i, 1))
+    class_weight = {0: w_i, 1: w_b}  # keys are y_bin values: I=0? wait y_bin is B=1
+    # y_bin: B -> 1, I -> 0
+    class_weight = {1: float(w_b), 0: float(w_i)}
+
+    alpha = 1.0 / max(C, 1e-6) / max(len(texts), 1)
+    clf = SGDClassifier(
+        loss="log_loss",
+        alpha=max(alpha, 1e-6),
         random_state=random_state,
-        solver="lbfgs",
-        class_weight="balanced",
+        max_iter=1,
+        learning_rate="optimal",
+        class_weight=class_weight,
+        tol=None,
     )
-    clf.fit(x, y_bin)
+
+    rng = np.random.default_rng(random_state)
+    order = np.arange(len(texts))
+    n_chars = 0
+    classes = np.array([0, 1], dtype=np.int64)
+    for epoch in range(max(1, max_iter // 50)):
+        rng.shuffle(order)
+        for start in range(0, len(order), batch_sentences):
+            batch_idx = order[start : start + batch_sentences]
+            batch_texts = [texts[i] for i in batch_idx]
+            batch_labels = [labels[i] for i in batch_idx]
+            x, y = featurize_corpus(batch_texts, batch_labels)
+            y_bin = (y == LABEL_B).astype(np.int64)
+            n_chars += int(x.shape[0])
+            if epoch == 0 and start == 0:
+                clf.partial_fit(x, y_bin, classes=classes)
+            else:
+                clf.partial_fit(x, y_bin)
+        print(f"  sgd epoch {epoch+1} chars_seen~{n_chars}", flush=True)
+
     weights = clf.coef_.reshape(-1).astype(np.float32)
     bias = float(clf.intercept_[0])
-    trans = _estimate_transitions(labels)
+    # Estimate transitions on a sample for speed
+    sample_n = min(len(labels), 20000)
+    sample_labels = labels[:sample_n]
+    trans = _estimate_transitions(sample_labels)
     return BoundaryModel(
         weights=weights,
         bias=bias,
         trans_log=trans,
         meta={
             "feature_dim": feature_dim(),
-            "n_chars": int(x.shape[0]),
+            "n_chars_seen": int(n_chars),
             "n_sentences": len(texts),
             "C": C,
             "decoder": "viterbi",
+            "trainer": "sgd",
         },
     )
 
