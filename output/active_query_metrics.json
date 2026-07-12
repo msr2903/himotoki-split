@@ -1,0 +1,72 @@
+{
+  "sample_n": 8000,
+  "query_k": 500,
+  "scored": 8000,
+  "feedback": 500,
+  "n_correct": 428,
+  "n_accept": 72,
+  "n_fail": 0,
+  "upsample": 15,
+  "augmented_n": 101633,
+  "feedback_path": "demo/data/feedback_active.jsonl",
+  "augmented_path": "data/labels/train_active.jsonl",
+  "top_query_scores": [
+    0.3083,
+    0.3059,
+    0.2934,
+    0.2647,
+    0.2619,
+    0.2556,
+    0.2545,
+    0.2486,
+    0.2458,
+    0.2338
+  ],
+  "mean_top_confidence": 0.9367818540334701,
+  "train": {
+    "onnx_path": "himotoki_split/models/default.onnx",
+    "n_sentences": 101633,
+    "epochs": 5,
+    "batch_size": 64,
+    "emb_dim": 64,
+    "hidden": 128,
+    "max_len": 256,
+    "epoch_logs": [
+      {
+        "epoch": 1,
+        "loss": 0.18040324596815924,
+        "val_boundary_f1": 0.9552517347746857,
+        "val_exact_seg": 0.271,
+        "val_n": 2000
+      },
+      {
+        "epoch": 2,
+        "loss": 0.10485615357967613,
+        "val_boundary_f1": 0.9685680961873554,
+        "val_exact_seg": 0.385,
+        "val_n": 2000
+      },
+      {
+        "epoch": 3,
+        "loss": 0.08487354975036662,
+        "val_boundary_f1": 0.9747454728388024,
+        "val_exact_seg": 0.453,
+        "val_n": 2000
+      },
+      {
+        "epoch": 4,
+        "loss": 0.07311988142046484,
+        "val_boundary_f1": 0.9790322615895262,
+        "val_exact_seg": 0.5085,
+        "val_n": 2000
+      },
+      {
+        "epoch": 5,
+        "loss": 0.06454037191537358,
+        "val_boundary_f1": 0.9810660031418807,
+        "val_exact_seg": 0.547,
+        "val_n": 2000
+      }
+    ]
+  }
+}

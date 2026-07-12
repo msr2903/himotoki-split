@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2 — Active-query retrain
+
+- Uncertainty sampling on train (8k scored → top 500); Himotoki oracle labels
+- Mild upsample retrain: clean exact-seg **45.3% → 46.0%**, F1 **0.9715 → 0.9718**
+- Script: `scripts/active_query_train.py`; feedback in `demo/data/feedback_active.jsonl`
+
 ## 0.2.1 — Demo UI
 
 - Add FastAPI playground (`demo/`) with split + active-query review

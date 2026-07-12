@@ -12,8 +12,14 @@ venv/
 .ruff_cache/
 *.onnx
 !himotoki_split/models/default.onnx
+himotoki_split/models/*.pre_active.onnx
+himotoki_split/models/*.active_mild.onnx
+himotoki_split/models/*.active_*.onnx
+!himotoki_split/models/default.onnx
 data/labels.jsonl
 data/labels/train.jsonl
+data/labels/train_active.jsonl
+data/labels/train_active_mild.jsonl
 data/labels/holdout.jsonl
 !data/labels/holdout_clean.jsonl
 data/labels/shards/

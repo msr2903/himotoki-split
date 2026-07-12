@@ -1,3 +1,4 @@
 # Demo runtime data (feedback grows here)
 *.jsonl
 !pool.example.jsonl
+!feedback_active.jsonl

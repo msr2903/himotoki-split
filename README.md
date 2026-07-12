@@ -52,6 +52,17 @@ python -m demo.app
 
 Feedback is appended to `demo/data/feedback.jsonl` (gitignored). The active-query pool defaults to `data/labels/holdout_clean.jsonl` when present, or `demo/data/pool.jsonl`.
 
+### Active-query retrain (batch)
+
+Agent/oracle loop over uncertain *train* examples (holdout stays frozen):
+
+```bash
+export HIMOTOKI_DB_PATH=~/.himotoki/himotoki.db
+python scripts/active_query_train.py --sample-n 8000 --query-k 500 --upsample 5 --epochs 6 --train
+python scripts/eval_model.py -m himotoki_split/models/default.onnx \
+  -i data/labels/holdout.jsonl --clean data/labels/holdout_clean.jsonl
+```
+
 ## Scale silver labels (Wikipedia → Himotoki → train)
 
 Large dumps stay **local** (gitignored). Wikipedia text is **CC BY-SA**.

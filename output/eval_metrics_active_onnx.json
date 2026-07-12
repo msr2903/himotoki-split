@@ -1,0 +1,18 @@
+{
+  "backend": "onnx",
+  "model": "himotoki_split/models/default.onnx",
+  "holdout": "data/labels/holdout.jsonl",
+  "n": 5000,
+  "boundary_f1": 0.9688288763391378,
+  "exact_seg": 0.4018,
+  "mean_confidence": 0.9764962630033494,
+  "exact_count": 2009,
+  "clean_holdout": "data/labels/holdout_clean.jsonl",
+  "clean": {
+    "n": 800,
+    "boundary_f1": 0.9695653291847721,
+    "exact_seg": 0.42,
+    "mean_confidence": 0.9759593335539103,
+    "exact_count": 336
+  }
+}
