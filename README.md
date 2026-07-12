@@ -40,6 +40,18 @@ himotoki-split --json "猫が食べる"
 `split()` prefers packaged `default.onnx` when `onnxruntime` is installed, otherwise `default.npz`.  
 Default hybrid fallback threshold is **`min_confidence=0.96`** (Phase B calibration).
 
+## Demo UI (FastAPI)
+
+Interactive playground + **active query** (surfaces low-confidence pool sentences for Accept / Correct feedback):
+
+```bash
+pip install -e ".[demo]"
+python -m demo.app
+# → http://127.0.0.1:8765
+```
+
+Feedback is appended to `demo/data/feedback.jsonl` (gitignored). The active-query pool defaults to `data/labels/holdout_clean.jsonl` when present, or `demo/data/pool.jsonl`.
+
 ## Scale silver labels (Wikipedia → Himotoki → train)
 
 Large dumps stay **local** (gitignored). Wikipedia text is **CC BY-SA**.

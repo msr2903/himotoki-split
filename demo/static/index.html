@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>himotoki-split</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="top">
+    <div class="brand">
+      <p class="brand-mark">himotoki-split</p>
+      <p class="brand-sub">境界モデルを試す / 不確かな例を拾う</p>
+    </div>
+    <div class="meta" id="healthMeta">loading…</div>
+  </header>
+
+  <main>
+    <section class="panel" id="playground">
+      <h2>Split</h2>
+      <p class="lede">文を入れて、モデルの分割と信頼度を見る。</p>
+      <textarea id="inputText" rows="4" placeholder="例：学校で勉強しています" spellcheck="false">今日は天気がいいので公園を散歩した。</textarea>
+      <div class="row controls">
+        <label class="check">
+          <input type="checkbox" id="fallback" />
+          Himotoki fallback
+        </label>
+        <label class="num">
+          min conf
+          <input type="number" id="minConf" min="0" max="1" step="0.01" value="0.96" />
+        </label>
+        <button type="button" class="btn primary" id="btnSplit">Split</button>
+      </div>
+      <div id="splitOut" class="out empty">結果がここに表示されます</div>
+    </section>
+
+    <section class="panel" id="active">
+      <div class="active-head">
+        <div>
+          <h2>Active query</h2>
+          <p class="lede">信頼度の低いプール例を優先表示。Accept / Correct で学習用フィードバックを保存。</p>
+        </div>
+        <div class="stats" id="activeStats"></div>
+      </div>
+      <div class="row controls">
+        <button type="button" class="btn primary" id="btnNext">Next uncertain</button>
+        <button type="button" class="btn ghost" id="btnReveal" disabled>Reveal gold</button>
+      </div>
+      <div id="activeOut" class="out empty">「Next uncertain」で不確かな文を取得</div>
+      <div id="correctBox" class="correct-box hidden">
+        <label for="correctEdit">Corrected segments（スペース区切り）</label>
+        <textarea id="correctEdit" rows="2" spellcheck="false"></textarea>
+        <p class="hint">文字を変えず、境界だけ直す。連結が原文と一致する必要があります。</p>
+      </div>
+      <div class="row controls" id="activeActions">
+        <button type="button" class="btn ok" id="btnAccept" disabled>Accept</button>
+        <button type="button" class="btn warn" id="btnCorrect" disabled>Save correction</button>
+        <button type="button" class="btn ghost" id="btnSkip" disabled>Skip</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>feedback → <code>demo/data/feedback.jsonl</code></span>
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>

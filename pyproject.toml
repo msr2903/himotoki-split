@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "himotoki-split"
-version = "0.2.0"
+version = "0.2.1"
 description = "Lightweight Japanese split-only tokenizer distilled from Himotoki"
 readme = "README.md"
 license = { text = "MIT" }
@@ -42,6 +42,11 @@ neural = [
 dev = [
   "pytest>=7.0.0",
   "scikit-learn>=1.3.0",
+  "onnxruntime>=1.16.0",
+]
+demo = [
+  "fastapi>=0.110.0",
+  "uvicorn[standard]>=0.27.0",
   "onnxruntime>=1.16.0",
 ]
 

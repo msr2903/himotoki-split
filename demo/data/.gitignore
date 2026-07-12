@@ -1,0 +1,3 @@
+# Demo runtime data (feedback grows here)
+*.jsonl
+!pool.example.jsonl

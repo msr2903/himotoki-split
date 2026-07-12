@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 — Demo UI
+
+- Add FastAPI playground (`demo/`) with split + active-query review
+- Feedback saved to `demo/data/feedback.jsonl` for later distillation
+
 ## 0.2.0 — Phase C soft-launch
 
 - Ship full-data students: ONNX BiLSTM on ~95k silver labels; linear SGD on full train
