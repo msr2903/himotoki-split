@@ -48,7 +48,10 @@ Interactive playground + **active query** (surfaces low-confidence pool sentence
 pip install -e ".[demo]"
 python -m demo.app
 # → http://127.0.0.1:8765
+# → http://127.0.0.1:8765/walkthrough   beginner canvas (repo / eval / training)
 ```
+
+Markdown twin: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
 
 Feedback is appended to `demo/data/feedback.jsonl` (gitignored). The active-query pool defaults to `data/labels/holdout_clean.jsonl` when present, or `demo/data/pool.jsonl`.
 
