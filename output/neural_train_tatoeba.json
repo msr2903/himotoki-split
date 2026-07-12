@@ -1,0 +1,55 @@
+{
+  "onnx_path": "himotoki_split/models/tatoeba.onnx",
+  "n_sentences": 143150,
+  "epochs": 6,
+  "batch_size": 64,
+  "emb_dim": 64,
+  "hidden": 128,
+  "max_len": 256,
+  "epoch_logs": [
+    {
+      "epoch": 1,
+      "loss": 0.12180120114921511,
+      "val_boundary_f1": 0.9747174747303603,
+      "val_exact_seg": 0.6905,
+      "val_n": 2000
+    },
+    {
+      "epoch": 2,
+      "loss": 0.0637596720870406,
+      "val_boundary_f1": 0.9816753808752452,
+      "val_exact_seg": 0.7635,
+      "val_n": 2000
+    },
+    {
+      "epoch": 3,
+      "loss": 0.050598767440754436,
+      "val_boundary_f1": 0.9858907400862269,
+      "val_exact_seg": 0.8035,
+      "val_n": 2000
+    },
+    {
+      "epoch": 4,
+      "loss": 0.042542569925463194,
+      "val_boundary_f1": 0.9889291516741672,
+      "val_exact_seg": 0.8445,
+      "val_n": 2000
+    },
+    {
+      "epoch": 5,
+      "loss": 0.036413152801238455,
+      "val_boundary_f1": 0.9905974228171258,
+      "val_exact_seg": 0.867,
+      "val_n": 2000
+    },
+    {
+      "epoch": 6,
+      "loss": 0.031481306572354394,
+      "val_boundary_f1": 0.9923431485916105,
+      "val_exact_seg": 0.885,
+      "val_n": 2000
+    }
+  ],
+  "limit": 0,
+  "val_size": 2000
+}

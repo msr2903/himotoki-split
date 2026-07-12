@@ -1,0 +1,27 @@
+{
+  "tatoeba_labels": 148409,
+  "tatoeba_train": 143150,
+  "tatoeba_holdout": 5000,
+  "models": {
+    "tatoeba.onnx on tatoeba holdout": {
+      "f1": 0.982693347805895,
+      "exact": 0.771,
+      "clean_f1": 0.9821882572379066,
+      "clean_exact": 0.74875
+    },
+    "tatoeba.onnx on wiki clean": {
+      "f1": 0.8570166055716265,
+      "exact": 0.025
+    },
+    "default.onnx (wiki) on tatoeba holdout": {
+      "f1": 0.9215249437895352,
+      "exact": 0.289,
+      "clean_f1": 0.920447113271821,
+      "clean_exact": 0.27625
+    },
+    "default.onnx (wiki) on wiki clean": {
+      "f1": 0.9718044879567406,
+      "exact": 0.46
+    }
+  }
+}

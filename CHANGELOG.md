@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3 — Tatoeba / JMdict indices
+
+- Add Tatoeba corpus + `jpn_indices` → labels pipeline (`docs/TATOEBA.md`)
+- Ship `tatoeba.onnx`: Tatoeba holdout F1 **0.983** / exact-seg **77.1%**
+- Wiki `default.onnx` kept for wiki-like text (domain split; mix next)
+
 ## 0.2.2 — Active-query retrain
 
 - Uncertainty sampling on train (8k scored → top 500); Himotoki oracle labels

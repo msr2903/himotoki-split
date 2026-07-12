@@ -55,6 +55,16 @@ Markdown twin: [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md).
 
 Feedback is appended to `demo/data/feedback.jsonl` (gitignored). The active-query pool defaults to `data/labels/holdout_clean.jsonl` when present, or `demo/data/pool.jsonl`.
 
+### Tatoeba / JMdict path
+
+Cleaner example sentences from [Tatoeba](https://tatoeba.org), with optional
+**JMdict-linked indices** as labels — see [docs/TATOEBA.md](docs/TATOEBA.md):
+
+```bash
+python scripts/tatoeba_indices_to_labels.py --download -o data/labels/tatoeba_indices.jsonl
+python scripts/build_tatoeba_corpus.py --download --target 200000 -o data/corpus/tatoeba_sentences.txt
+```
+
 ### Active-query retrain (batch)
 
 Agent/oracle loop over uncertain *train* examples (holdout stays frozen):

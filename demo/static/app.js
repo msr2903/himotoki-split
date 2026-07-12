@@ -98,6 +98,7 @@
           text,
           fallback: $("fallback").checked,
           min_confidence: Number($("minConf").value || 0.96),
+          model: $("modelSel") ? $("modelSel").value : "default",
         }),
       });
       renderResult(out, data);

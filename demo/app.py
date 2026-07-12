@@ -45,6 +45,24 @@ class SplitRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=2000)
     fallback: bool = False
     min_confidence: float = 0.96
+    model: str = Field(
+        default="default",
+        description="default | tatoeba | or a .onnx/.npz path",
+    )
+
+
+def _resolve_model_path(name: str) -> Optional[Path]:
+    if name in ("", "default", "auto"):
+        return None
+    models = ROOT.parent / "himotoki_split" / "models"
+    if name == "tatoeba":
+        p = models / "tatoeba.onnx"
+        return p if p.is_file() else None
+    p = Path(name)
+    if p.is_file():
+        return p
+    cand = models / name
+    return cand if cand.is_file() else None
 
 
 class FeedbackRequest(BaseModel):
@@ -197,7 +215,37 @@ def api_split(body: SplitRequest) -> Dict[str, Any]:
     text = body.text.strip()
     if not text:
         raise HTTPException(400, "empty text")
-    return _split_payload(text, body.fallback, body.min_confidence)
+    model_path = _resolve_model_path(body.model)
+    if body.model not in ("", "default", "auto") and model_path is None:
+        raise HTTPException(404, f"Unknown model: {body.model}")
+    # Temporarily bypass cache when a specific model is requested
+    from himotoki_split.split import split as _split
+
+    if model_path is not None:
+        from himotoki_split.neural import OnnxBoundaryModel
+        from himotoki_split.model import load_model
+
+        if model_path.suffix == ".onnx":
+            model = OnnxBoundaryModel.load(model_path)
+        else:
+            model = load_model(model_path)
+        pred = model.predict(text)
+        probs = []
+        if hasattr(model, "predict_proba_b"):
+            probs = [float(p) for p in model.predict_proba_b(text)]
+        return {
+            "text": text,
+            "segments": pred.segments,
+            "confidence": float(pred.confidence),
+            "source": "model",
+            "labels": pred.labels,
+            "char_probs": probs,
+            "joined_ok": "".join(pred.segments) == text,
+            "model": body.model,
+        }
+    payload = _split_payload(text, body.fallback, body.min_confidence)
+    payload["model"] = "default"
+    return payload
 
 
 @app.get("/api/active/next")

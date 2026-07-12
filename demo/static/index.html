@@ -26,6 +26,13 @@
       <p class="lede">文を入れて、モデルの分割と信頼度を見る。</p>
       <textarea id="inputText" rows="4" placeholder="例：学校で勉強しています" spellcheck="false">今日は天気がいいので公園を散歩した。</textarea>
       <div class="row controls">
+        <label class="num">
+          model
+          <select id="modelSel">
+            <option value="default">default (wiki)</option>
+            <option value="tatoeba">tatoeba (JMdict indices)</option>
+          </select>
+        </label>
         <label class="check">
           <input type="checkbox" id="fallback" />
           Himotoki fallback

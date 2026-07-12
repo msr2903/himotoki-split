@@ -143,12 +143,12 @@ textarea:focus {
   align-items: center;
 }
 
-.num input {
-  width: 4.2rem;
+.num select {
   border: 1px solid var(--line);
   background: var(--chip);
   padding: 0.35rem 0.4rem;
-  font-family: var(--mono);
+  font-family: var(--sans);
+  max-width: 14rem;
 }
 
 .btn {
