@@ -1,9 +1,14 @@
 {
-  "n": 559,
-  "best_C": 0.5,
-  "val_boundary_f1": 0.8622650816454402,
-  "val_exact_seg": 0.11711711711711711,
-  "train_boundary_f1": 0.8900183867841533,
-  "train_exact_seg": 0.15384615384615385,
-  "model_bytes": 8266
+  "model": "himotoki_split/models/default.npz",
+  "n_sentences": 94997,
+  "C": 1.0,
+  "max_iter": 400,
+  "meta": {
+    "feature_dim": 1945,
+    "n_chars_seen": 33024712,
+    "n_sentences": 94997,
+    "C": 1.0,
+    "decoder": "viterbi",
+    "trainer": "sgd"
+  }
 }

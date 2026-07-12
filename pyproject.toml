@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "himotoki-split"
-version = "0.1.0"
+version = "0.2.0"
 description = "Lightweight Japanese split-only tokenizer distilled from Himotoki"
 readme = "README.md"
-license = "MIT"
+license = { text = "MIT" }
 requires-python = ">=3.10"
 authors = [{ name = "Himotoki Contributors" }]
 keywords = ["japanese", "nlp", "tokenizer", "segmentation", "himotoki"]

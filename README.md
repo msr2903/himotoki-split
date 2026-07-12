@@ -102,6 +102,28 @@ python scripts/calibrate_fallback.py -m himotoki_split/models/default.onnx
 
 Hybrid fallback at `min_confidence=0.96`: exact-seg **48.2%** with ~**14%** Himotoki calls.
 
+### Phase C — soft-launch (v0.2.0)
+
+Packaging polish for a public soft-launch:
+
+```bash
+# Retrain zero-deps linear student on full train (optional; already shipped)
+python scripts/train.py -i data/labels/train.jsonl -o himotoki_split/models/default.npz
+
+# Latency microbench (clean-100 sample)
+python scripts/bench_latency.py
+
+# Build + smoke
+pip install build twine
+python -m build && twine check dist/*
+```
+
+**Latency** (100 clean sentences, CPU): ONNX ≈ **0.34 ms/sent** (~3k sent/s); linear ≈ **2.4 ms/sent**; `split()` API ≈ **0.61 ms/sent**.
+
+Linear full-95k retrain landed at similar holdout F1 to the Phase A 30k model (~0.917) — capacity-limited; prefer ONNX for quality.
+
+See [CHANGELOG.md](CHANGELOG.md) and [PUBLISH.md](PUBLISH.md) for release steps (TestPyPI/PyPI).
+
 Optional later growth (append-only train, freeze holdout):
 
 ```bash

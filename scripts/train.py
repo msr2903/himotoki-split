@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -25,31 +26,44 @@ def main() -> int:
         help="Output .npz model path",
     )
     ap.add_argument("--C", type=float, default=1.0)
-    ap.add_argument("--max-iter", type=int, default=300)
+    ap.add_argument("--max-iter", type=int, default=400)
+    ap.add_argument(
+        "--limit",
+        type=int,
+        default=0,
+        help="Optional cap (0 = all)",
+    )
+    ap.add_argument(
+        "--metrics-out",
+        type=Path,
+        default=Path("output/train_metrics.json"),
+    )
     args = ap.parse_args()
 
-    from himotoki_split.labels import boundary_f1, segments_to_bio
     from himotoki_split.model import load_jsonl_dataset, train_boundary_model
 
     texts, segs = load_jsonl_dataset(args.input)
+    if args.limit > 0:
+        texts, segs = texts[: args.limit], segs[: args.limit]
     if not texts:
         print("No training examples", file=sys.stderr)
         return 1
 
+    print(f"Training linear SGD on {len(texts)} sentences (max_iter={args.max_iter})")
     model = train_boundary_model(texts, segs, C=args.C, max_iter=args.max_iter)
     model.save(args.output)
 
-    # Quick train-set boundary F1
-    tp = []
-    for text, gold_segs in zip(texts, segs):
-        gold = segments_to_bio(text, gold_segs)
-        pred = model.predict(text)
-        tp.append(boundary_f1(gold, pred.labels))
-    p = sum(x[0] for x in tp) / len(tp)
-    r = sum(x[1] for x in tp) / len(tp)
-    f = sum(x[2] for x in tp) / len(tp)
+    metrics = {
+        "model": str(args.output),
+        "n_sentences": len(texts),
+        "C": args.C,
+        "max_iter": args.max_iter,
+        "meta": model.meta,
+    }
+    args.metrics_out.parent.mkdir(parents=True, exist_ok=True)
+    args.metrics_out.write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     print(f"Saved {args.output}")
-    print(f"Train boundary P/R/F1: {p:.3f}/{r:.3f}/{f:.3f} on {len(texts)} sents")
+    print(json.dumps(metrics, indent=2))
     return 0
 
 

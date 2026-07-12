@@ -1,0 +1,38 @@
+{
+  "n_texts": 100,
+  "backends": {
+    "linear": {
+      "rounds": 50,
+      "sentences_per_round": 100,
+      "total_sentences": 5000,
+      "total_chars": 189150,
+      "mean_batch_s": 0.23803725678182672,
+      "median_batch_s": 0.23795430950121954,
+      "sentences_per_s": 420.1023039500707,
+      "chars_per_s": 15892.470158431175,
+      "mean_ms_per_sentence": 2.3803725678182674
+    },
+    "onnx": {
+      "rounds": 50,
+      "sentences_per_round": 100,
+      "total_sentences": 5000,
+      "total_chars": 189150,
+      "mean_batch_s": 0.033862816960318017,
+      "median_batch_s": 0.03051460451388266,
+      "sentences_per_s": 2953.0915906135197,
+      "chars_per_s": 111715.45487290945,
+      "mean_ms_per_sentence": 0.33862816960318015
+    },
+    "split_api": {
+      "rounds": 50,
+      "sentences_per_round": 100,
+      "total_sentences": 5000,
+      "total_chars": 189150,
+      "mean_batch_s": 0.06143662731803488,
+      "median_batch_s": 0.06122283748118207,
+      "sentences_per_s": 1627.6935171316727,
+      "chars_per_s": 61575.64575309118,
+      "mean_ms_per_sentence": 0.6143662731803488
+    }
+  }
+}

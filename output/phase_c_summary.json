@@ -1,0 +1,36 @@
+{
+  "phase": "C",
+  "version": "0.2.0",
+  "goal": "soft-launch packaging + full-data linear retrain + latency bench",
+  "linear_train": {
+    "n_sentences": 94997,
+    "max_iter": 400,
+    "sgd_epochs": 8
+  },
+  "holdout_5k": {
+    "linear_f1": 0.9169,
+    "linear_exact": 0.1056,
+    "onnx_f1": 0.9701,
+    "onnx_exact": 0.419
+  },
+  "holdout_clean_800": {
+    "linear_f1": 0.9194,
+    "linear_exact": 0.1225,
+    "onnx_f1": 0.9715,
+    "onnx_exact": 0.4525
+  },
+  "latency_clean100": {
+    "linear_ms_per_sent": 2.38,
+    "onnx_ms_per_sent": 0.34,
+    "split_api_ms_per_sent": 0.61,
+    "onnx_sents_per_s": 2953
+  },
+  "fallback_min_confidence": 0.96,
+  "prefer_runtime": "onnx",
+  "package": {
+    "version": "0.2.0",
+    "wheel_built": true,
+    "pypi_upload": "manual — needs PyPI token (see PUBLISH.md)"
+  },
+  "next_step": "optional: upload to TestPyPI/PyPI; enable CI with workflow scope; optional 500k silver growth"
+}
