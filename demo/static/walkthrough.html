@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Walkthrough · himotoki-split</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/app.css" />
+  <link rel="stylesheet" href="/static/walkthrough.css" />
+</head>
+<body class="walk-body">
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="top walk-top">
+    <div class="brand">
+      <p class="brand-mark">Walkthrough</p>
+      <p class="brand-sub">Understand the repo, eval numbers, and training — as a beginner</p>
+    </div>
+    <nav class="walk-nav">
+      <a href="/">← Demo</a>
+      <a href="#map">Repo</a>
+      <a href="#eval">Eval</a>
+      <a href="#train">Training</a>
+      <a href="#live">Live numbers</a>
+    </nav>
+  </header>
+
+  <main class="walk-main">
+    <!-- INTRO -->
+    <section class="panel walk-panel" id="intro">
+      <p class="step-tag">0 · Orientation</p>
+      <h2>What is this project?</h2>
+      <p class="lede">
+        Japanese text has no spaces. <strong>himotoki-split</strong> guesses where words start —
+        like drawing bars between characters.
+      </p>
+      <div class="example-split" aria-label="Example segmentation">
+        <div class="ex-label">Input</div>
+        <div class="ex-text">猫が食べる</div>
+        <div class="ex-label">Model output</div>
+        <div class="ex-chips">
+          <span class="chip">猫</span>
+          <span class="chip">が</span>
+          <span class="chip">食べる</span>
+        </div>
+      </div>
+      <p class="note">
+        Himotoki (the big teacher) also returns readings &amp; meanings (~1.8&nbsp;GB).
+        This student only does <em>splits</em>, in a few megabytes.
+      </p>
+    </section>
+
+    <!-- REPO MAP -->
+    <section class="panel walk-panel" id="map">
+      <p class="step-tag">1 · Repo map</p>
+      <h2>Where things live</h2>
+      <p class="lede">You don’t need every file. Follow this path:</p>
+
+      <ol class="flow">
+        <li>
+          <code>data/labels/*.jsonl</code>
+          <span>Sentences + gold-ish segments from the teacher (Himotoki).</span>
+        </li>
+        <li>
+          <code>scripts/train_neural.py</code>
+          <span>Trains the BiLSTM and writes <code>default.onnx</code>.</span>
+        </li>
+        <li>
+          <code>himotoki_split/models/</code>
+          <span>Shipped models: <code>default.onnx</code> (best) and <code>default.npz</code> (tiny fallback).</span>
+        </li>
+        <li>
+          <code>scripts/eval_model.py</code>
+          <span>Scores a model on holdout → writes JSON under <code>output/</code>.</span>
+        </li>
+        <li>
+          <code>demo/</code>
+          <span>This website: try splits + active query.</span>
+        </li>
+      </ol>
+
+      <div class="diagram" role="img" aria-label="Pipeline diagram">
+        <div class="node">Wikipedia<br/><small>raw text</small></div>
+        <div class="arrow">→</div>
+        <div class="node">Himotoki<br/><small>teacher labels</small></div>
+        <div class="arrow">→</div>
+        <div class="node">train.jsonl<br/><small>~95k rows</small></div>
+        <div class="arrow">→</div>
+        <div class="node accent">BiLSTM<br/><small>default.onnx</small></div>
+        <div class="arrow">→</div>
+        <div class="node">eval<br/><small>F1 / exact</small></div>
+      </div>
+
+      <details class="more">
+        <summary>More folders (optional)</summary>
+        <ul>
+          <li><code>himotoki_split/</code> — library code (<code>split.py</code>, <code>neural.py</code>, …)</li>
+          <li><code>scripts/active_query_train.py</code> — pick uncertain examples, relabel, retrain</li>
+          <li><code>output/*_summary.json</code> — human-readable phase reports</li>
+          <li><code>tests/</code> — pytest; run with <code>pytest tests/ -q</code></li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- EVAL -->
+    <section class="panel walk-panel" id="eval">
+      <p class="step-tag">2 · Evaluation for beginners</p>
+      <h2>How to read eval numbers</h2>
+      <p class="lede">
+        After training we ask: “On sentences the model never trained on, how good are the splits?”
+      </p>
+
+      <div class="card-grid">
+        <article class="card">
+          <h3>Boundary F1</h3>
+          <p class="big" id="liveF1">—</p>
+          <p>
+            Think “how often did we put a cut in the right place?”
+            <br/>Ranges <strong>0 → 1</strong>. Higher is better.
+          </p>
+          <p class="hint-box">
+            <strong>0.97</strong> = excellent character-boundary skill.
+            Small changes (0.970 → 0.972) still matter.
+          </p>
+        </article>
+        <article class="card">
+          <h3>Exact-seg</h3>
+          <p class="big" id="liveExact">—</p>
+          <p>
+            “Was the <em>entire sentence</em> split perfectly?”
+            One wrong cut → counts as fail.
+          </p>
+          <p class="hint-box">
+            Much harder than F1. <strong>~45%</strong> on clean wiki text is solid;
+            everyday short sentences feel better than this number suggests.
+          </p>
+        </article>
+      </div>
+
+      <h3 class="subh">Two test sets (don’t mix them up)</h3>
+      <table class="plain">
+        <thead>
+          <tr><th>Set</th><th>What it is</th><th>Why it exists</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>holdout.jsonl</code> (5k)</td>
+            <td>Frozen random wiki sentences</td>
+            <td>Apples-to-apples compare across experiments</td>
+          </tr>
+          <tr>
+            <td><code>holdout_clean.jsonl</code> (~800)</td>
+            <td>Shorter, less markup junk</td>
+            <td>Closer to “real product” quality</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="subh">Mini example</h3>
+      <div class="mini-eval">
+        <p>Gold: <code>今日 | は | 天気 | が | いい</code></p>
+        <p>Pred: <code>今日 | は | 天気がいい</code></p>
+        <ul>
+          <li>Exact-seg → <strong>fail</strong> (not identical)</li>
+          <li>Boundary F1 → still fairly high (many cuts agree)</li>
+        </ul>
+        <p class="note">That’s why F1 can look great while exact-seg looks “low.”</p>
+      </div>
+
+      <h3 class="subh">What “good enough” looks like</h3>
+      <ul class="targets">
+        <li><span>Ship / demo</span> F1 ≥ 0.97 on clean</li>
+        <li><span>Useful product</span> exact ≥ 60–70% on clean</li>
+        <li><span>Strong</span> exact ≥ 80% on a hand-checked gold set</li>
+      </ul>
+      <p class="note">You’re past the ship bar on F1; exact is the climb still ahead.</p>
+    </section>
+
+    <!-- TRAINING -->
+    <section class="panel walk-panel" id="train">
+      <p class="step-tag">3 · Training results</p>
+      <h2>How to read a training run</h2>
+      <p class="lede">
+        Training prints one line per <em>epoch</em> (one full pass over the data).
+      </p>
+
+      <pre class="log-sample" id="logSample">epoch 1/6 loss=0.1780 val_f1=0.9530 val_exact=0.2690
+epoch 2/6 loss=0.1049 val_f1=0.9656 val_exact=0.3530
+epoch 6/6 loss=0.0594 val_f1=0.9824 val_exact=0.5570</pre>
+
+      <div class="card-grid three">
+        <article class="card">
+          <h3>loss ↓</h3>
+          <p>Training error. Should fall over epochs. If it stalls high, learning isn’t working.</p>
+        </article>
+        <article class="card">
+          <h3>val_f1 ↑</h3>
+          <p>F1 on a slice of train used as a progress check. Optimistic — not the real holdout.</p>
+        </article>
+        <article class="card">
+          <h3>val_exact ↑</h3>
+          <p>Exact-seg on that same slice. Often much higher than holdout exact (data leakage-ish).</p>
+        </article>
+      </div>
+
+      <div class="warn-box">
+        <strong>Rule of thumb:</strong> never celebrate <code>val_*</code> alone.
+        Always run <code>scripts/eval_model.py</code> on the frozen holdout / clean set.
+        Those numbers in <code>output/eval_*.json</code> are the ones that count.
+      </div>
+
+      <h3 class="subh">Files to open after a run</h3>
+      <ol class="flow">
+        <li>
+          <code>output/neural_train_metrics.json</code>
+          <span>Epoch logs, sentence count, hyperparameters.</span>
+        </li>
+        <li>
+          <code>output/eval_metrics_*.json</code>
+          <span>Holdout + clean F1 / exact for a specific model.</span>
+        </li>
+        <li>
+          <code>output/phase_*_summary.json</code>
+          <span>Short story of a whole phase (A/B/C/active).</span>
+        </li>
+        <li>
+          <code>output/active_query_summary.json</code>
+          <span>What active learning tried and which model won.</span>
+        </li>
+      </ol>
+    </section>
+
+    <!-- LIVE -->
+    <section class="panel walk-panel" id="live">
+      <p class="step-tag">4 · Live snapshot</p>
+      <h2>Current shipped numbers</h2>
+      <p class="lede">Loaded from this machine’s <code>output/</code> summaries.</p>
+      <div id="liveBoard" class="live-board">Loading metrics…</div>
+      <p class="note">
+        Try a sentence on the <a href="/">demo</a>, then come back and match
+        confidence / segments to these ideas.
+      </p>
+    </section>
+
+    <!-- CHEAT -->
+    <section class="panel walk-panel" id="cheat">
+      <p class="step-tag">5 · Cheat sheet</p>
+      <h2>Commands you’ll actually use</h2>
+      <pre class="log-sample"># Try one sentence (CLI)
+himotoki-split "猫が食べる"
+
+# Score the shipped ONNX model
+python scripts/eval_model.py -m himotoki_split/models/default.onnx \
+  -i data/labels/holdout.jsonl --clean data/labels/holdout_clean.jsonl
+
+# Active-query retrain (needs Himotoki DB)
+python scripts/active_query_train.py --query-k 500 --upsample 5 --train
+
+# This demo
+python -m demo.app   # → http://127.0.0.1:8765</pre>
+    </section>
+  </main>
+
+  <footer>
+    <span>Walkthrough canvas · <a href="/" style="color:inherit">back to demo</a></span>
+  </footer>
+  <script src="/static/walkthrough.js"></script>
+</body>
+</html>

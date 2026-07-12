@@ -307,6 +307,62 @@ def index() -> FileResponse:
     return FileResponse(STATIC / "index.html")
 
 
+@app.get("/walkthrough")
+def walkthrough() -> FileResponse:
+    return FileResponse(STATIC / "walkthrough.html")
+
+
+@app.get("/api/walkthrough")
+def api_walkthrough() -> Dict[str, Any]:
+    """Bundle beginner-facing metrics for the walkthrough canvas."""
+    root = ROOT.parent
+    out = root / "output"
+
+    def _read(name: str) -> Optional[Dict[str, Any]]:
+        path = out / name
+        if not path.is_file():
+            return None
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+
+    pre = _read("eval_metrics_pre_active_onnx.json")
+    mild = _read("eval_metrics_active_mild_onnx.json")
+    heavy = _read("eval_metrics_active_onnx.json")
+    aq_sum = _read("active_query_summary.json")
+    aq = _read("active_query_metrics.json")
+    phase_b = _read("phase_b_summary.json")
+    phase_c = _read("phase_c_summary.json")
+    train_mild = _read("neural_train_active_mild.json")
+
+    train_log_sample = None
+    if train_mild and train_mild.get("epoch_logs"):
+        logs = train_mild["epoch_logs"]
+        lines = []
+        for log in logs[:2] + logs[-1:]:
+            lines.append(
+                f"epoch {log.get('epoch')}/{train_mild.get('epochs', '?')} "
+                f"loss={log.get('loss', 0):.4f} "
+                f"val_f1={log.get('val_boundary_f1', 0):.4f} "
+                f"val_exact={log.get('val_exact_seg', 0):.4f}"
+            )
+        # de-dupe if only 1-2 epochs
+        train_log_sample = "\n".join(dict.fromkeys(lines))
+
+    selected = (aq_sum or {}).get("selected") or "active_mild"
+    return {
+        "selected": selected,
+        "pre_active": pre,
+        "active_mild": mild,
+        "active_heavy": heavy,
+        "active_query": (aq_sum or {}).get("active_query") or aq,
+        "phase_b": phase_b,
+        "phase_c": phase_c,
+        "train_log_sample": train_log_sample,
+    }
+
+
 app.mount("/static", StaticFiles(directory=str(STATIC)), name="static")
 
 
