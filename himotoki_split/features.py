@@ -16,7 +16,9 @@ _SCRIPT_DIGIT = 5
 _SCRIPT_PUNCT = 6
 _N_SCRIPTS = 7
 
-WINDOW = 2  # chars left/right
+WINDOW = 3  # chars left/right
+CHAR_HASH_BUCKETS = 256
+HASH_OFFSETS = (-2, -1, 0, 1, 2)
 
 
 def char_script(ch: str) -> int:
@@ -38,17 +40,23 @@ def char_script(ch: str) -> int:
 
 def _one_hot(index: int, size: int) -> List[float]:
     row = [0.0] * size
-    row[index] = 1.0
+    if 0 <= index < size:
+        row[index] = 1.0
     return row
 
 
+def _char_hash(ch: str) -> int:
+    # Stable across processes; prefer identity for BMP
+    return (ord(ch) * 2654435761) % CHAR_HASH_BUCKETS
+
+
 def feature_dim() -> int:
-    # center script + left/right scripts + same-as-prev + is-first + is-last
-    # + bigram script pairs (center, prev) and (center, next)
-    # window scripts: (2*WINDOW+1) * N_SCRIPTS
-    # flags: 4
-    # prev/next pair one-hots: 2 * N_SCRIPTS * N_SCRIPTS (compressed via indices only? keep full)
-    return (2 * WINDOW + 1) * _N_SCRIPTS + 4 + 2 * (_N_SCRIPTS * _N_SCRIPTS)
+    script_win = (2 * WINDOW + 1) * _N_SCRIPTS
+    script_pairs = 2 * (_N_SCRIPTS * _N_SCRIPTS)
+    flags = 6
+    char_hashes = len(HASH_OFFSETS) * CHAR_HASH_BUCKETS
+    bigram_hashes = 2 * CHAR_HASH_BUCKETS  # (prev,cur) and (cur,next) hashed
+    return script_win + script_pairs + flags + char_hashes + bigram_hashes
 
 
 def featurize_char(text: str, i: int) -> np.ndarray:
@@ -74,6 +82,27 @@ def featurize_char(text: str, i: int) -> np.ndarray:
     feats.append(1.0 if i == n - 1 else 0.0)
     feats.append(1.0 if i > 0 and scripts[i] == scripts[i - 1] else 0.0)
     feats.append(1.0 if i + 1 < n and scripts[i] != scripts[i + 1] else 0.0)
+    feats.append(1.0 if i > 0 and scripts[i - 1] == _SCRIPT_KANJI and scripts[i] == _SCRIPT_HIRA else 0.0)
+    feats.append(1.0 if i > 0 and scripts[i - 1] == _SCRIPT_HIRA and scripts[i] == _SCRIPT_KANJI else 0.0)
+
+    for off in HASH_OFFSETS:
+        j = i + off
+        if 0 <= j < n:
+            feats.extend(_one_hot(_char_hash(text[j]), CHAR_HASH_BUCKETS))
+        else:
+            feats.extend([0.0] * CHAR_HASH_BUCKETS)
+
+    # hashed char bigrams
+    if i > 0:
+        bg = (_char_hash(text[i - 1]) * 31 + _char_hash(text[i])) % CHAR_HASH_BUCKETS
+    else:
+        bg = 0
+    feats.extend(_one_hot(bg, CHAR_HASH_BUCKETS))
+    if i + 1 < n:
+        bg2 = (_char_hash(text[i]) * 31 + _char_hash(text[i + 1])) % CHAR_HASH_BUCKETS
+    else:
+        bg2 = 0
+    feats.extend(_one_hot(bg2, CHAR_HASH_BUCKETS))
 
     arr = np.asarray(feats, dtype=np.float32)
     if arr.shape[0] != feature_dim():

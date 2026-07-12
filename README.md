@@ -55,6 +55,10 @@ python scripts/dump_labels.py -i data/sample_sentences.txt -o data/labels.jsonl
 python scripts/train.py -i data/labels.jsonl -o himotoki_split/models/default.npz
 ```
 
+Shipped `default.npz` was trained on **559** Himotoki silver labels
+(`data/labels_himotoki510.jsonl` + samples): ~**0.86** held-out boundary F1
+(char B/I), logistic regression + Viterbi, numpy runtime (~8 KB).
+
 ## Design
 
 - **Teacher:** Himotoki `segment_text` top path → character B/I labels  
