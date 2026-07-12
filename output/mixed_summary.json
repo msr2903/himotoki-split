@@ -1,0 +1,30 @@
+{
+  "train_n": 238147,
+  "wiki_n": 94997,
+  "tatoeba_n": 143150,
+  "mixed_on_wiki": {
+    "f1": 0.9702748456948448,
+    "exact": 0.4218,
+    "clean_f1": 0.9709060029258373,
+    "clean_exact": 0.4525
+  },
+  "mixed_on_tatoeba": {
+    "f1": 0.9745076172996611,
+    "exact": 0.6782,
+    "clean_f1": 0.9744468886223224,
+    "clean_exact": 0.6625
+  },
+  "baselines": {
+    "wiki_on_wiki_clean_exact": 0.46,
+    "tatoeba_on_tatoeba_clean_exact": 0.74875,
+    "wiki_on_tatoeba_clean_exact": 0.27625,
+    "tatoeba_on_wiki_clean_exact": 0.025
+  },
+  "avg_clean_exact": {
+    "mixed": 0.5575,
+    "wiki_only": 0.36812500000000004,
+    "tatoeba_only": 0.386875
+  },
+  "selected_default": "mixed",
+  "ship_mixed_as_default": true
+}

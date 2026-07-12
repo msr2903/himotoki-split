@@ -1,0 +1,18 @@
+{
+  "backend": "onnx",
+  "model": "himotoki_split/models/mixed.onnx",
+  "holdout": "data/labels/tatoeba_holdout.jsonl",
+  "n": 5000,
+  "boundary_f1": 0.9745076172996611,
+  "exact_seg": 0.6782,
+  "mean_confidence": 0.9793552556991577,
+  "exact_count": 3391,
+  "clean_holdout": "data/labels/tatoeba_holdout_clean.jsonl",
+  "clean": {
+    "n": 800,
+    "boundary_f1": 0.9744468886223224,
+    "exact_seg": 0.6625,
+    "mean_confidence": 0.9792577078938485,
+    "exact_count": 530
+  }
+}

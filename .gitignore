@@ -13,6 +13,8 @@ venv/
 *.onnx
 !himotoki_split/models/default.onnx
 !himotoki_split/models/tatoeba.onnx
+!himotoki_split/models/wiki.onnx
+!himotoki_split/models/mixed.onnx
 himotoki_split/models/*.pre_active.onnx
 himotoki_split/models/*.active_mild.onnx
 himotoki_split/models/*.active_*.onnx
@@ -20,6 +22,7 @@ data/labels.jsonl
 data/labels/train.jsonl
 data/labels/train_active.jsonl
 data/labels/train_active_mild.jsonl
+data/labels/train_mixed.jsonl
 data/labels/tatoeba_*.jsonl
 !data/labels/tatoeba_holdout_clean.jsonl
 data/labels/holdout.jsonl

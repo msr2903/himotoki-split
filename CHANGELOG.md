@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4 — Mixed wiki + Tatoeba train
+
+- Train on 238k union (95k wiki silver + 143k Tatoeba indices); both holdouts frozen
+- Ship `mixed.onnx` as `default.onnx`; keep `wiki.onnx` + `tatoeba.onnx` specialists
+- Mixed: wiki clean exact ≈45%, Tatoeba clean exact ≈66% (best cross-domain average)
+
 ## 0.2.3 — Tatoeba / JMdict indices
 
 - Add Tatoeba corpus + `jpn_indices` → labels pipeline (`docs/TATOEBA.md`)

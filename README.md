@@ -65,6 +65,9 @@ python scripts/tatoeba_indices_to_labels.py --download -o data/labels/tatoeba_in
 python scripts/build_tatoeba_corpus.py --download --target 200000 -o data/corpus/tatoeba_sentences.txt
 ```
 
+Shipped models: **`default.onnx`** = mixed wiki+Tatoeba (best cross-domain);
+`tatoeba.onnx` / `wiki.onnx` = specialists. See [docs/TATOEBA.md](docs/TATOEBA.md).
+
 ### Active-query retrain (batch)
 
 Agent/oracle loop over uncertain *train* examples (holdout stays frozen):

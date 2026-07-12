@@ -65,6 +65,21 @@ python scripts/merge_labels.py \
   --holdout-out data/labels/holdout.jsonl
 ```
 
+## Optional mix with wiki silver
+
+```bash
+# Build mixed train (exclude both frozen holdouts) — see scripts / prior runs
+# Trained artifact: himotoki_split/models/mixed.onnx (also shipped as default.onnx)
+
+python scripts/eval_model.py -m himotoki_split/models/mixed.onnx \
+  -i data/labels/holdout.jsonl --clean data/labels/holdout_clean.jsonl
+python scripts/eval_model.py -m himotoki_split/models/mixed.onnx \
+  -i data/labels/tatoeba_holdout.jsonl --clean data/labels/tatoeba_holdout_clean.jsonl
+```
+
+**Mixed results (v0.2.4):** wiki clean exact ≈ **45%**, Tatoeba clean exact ≈ **66%** —
+best average across domains. Specialists remain as `wiki.onnx` / `tatoeba.onnx`.
+
 ## License
 
 - Tatoeba sentences: **CC BY 2.0 FR** — attribute [Tatoeba](https://tatoeba.org) and sentence authors.

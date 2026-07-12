@@ -58,6 +58,9 @@ def _resolve_model_path(name: str) -> Optional[Path]:
     if name == "tatoeba":
         p = models / "tatoeba.onnx"
         return p if p.is_file() else None
+    if name in ("wiki", "mixed"):
+        p = models / f"{name}.onnx"
+        return p if p.is_file() else None
     p = Path(name)
     if p.is_file():
         return p
