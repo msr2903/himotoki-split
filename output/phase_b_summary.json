@@ -1,0 +1,31 @@
+{
+  "phase": "B",
+  "onnx_train": {
+    "n_sentences": 94997,
+    "epochs": 6,
+    "batch_size": 64,
+    "final_val_f1": 0.9821,
+    "final_val_exact": 0.561
+  },
+  "holdout_5k": {
+    "linear_f1": 0.9169,
+    "linear_exact": 0.1056,
+    "onnx_f1": 0.9701,
+    "onnx_exact": 0.419
+  },
+  "holdout_clean_800": {
+    "linear_f1": 0.9194,
+    "linear_exact": 0.1225,
+    "onnx_f1": 0.9715,
+    "onnx_exact": 0.4525
+  },
+  "prefer_runtime": "onnx",
+  "fallback": {
+    "recommended_min_confidence": 0.96,
+    "hybrid_exact_seg": 0.4822,
+    "teacher_call_rate": 0.1422
+  },
+  "success_bar_met": true,
+  "grow_500k": "skipped — full-95k ONNX already met exact≥20% and F1≥0.94",
+  "next_step": "soft-launch ready; optional later: 500k dump for further gains"
+}

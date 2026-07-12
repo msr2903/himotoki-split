@@ -1,9 +1,55 @@
 {
   "onnx_path": "himotoki_split/models/default.onnx",
-  "n_sentences": 5000,
-  "epochs": 2,
+  "n_sentences": 94997,
+  "epochs": 6,
+  "batch_size": 64,
   "emb_dim": 64,
   "hidden": 128,
-  "train_boundary_f1": 0.8997262007860143,
-  "train_exact_seg": 0.069
+  "max_len": 256,
+  "epoch_logs": [
+    {
+      "epoch": 1,
+      "loss": 0.17655441956186937,
+      "val_boundary_f1": 0.9546020910826284,
+      "val_exact_seg": 0.2695,
+      "val_n": 2000
+    },
+    {
+      "epoch": 2,
+      "loss": 0.10412181294225281,
+      "val_boundary_f1": 0.9655735728718808,
+      "val_exact_seg": 0.363,
+      "val_n": 2000
+    },
+    {
+      "epoch": 3,
+      "loss": 0.08614268237944404,
+      "val_boundary_f1": 0.9723515478106649,
+      "val_exact_seg": 0.433,
+      "val_n": 2000
+    },
+    {
+      "epoch": 4,
+      "loss": 0.07500424496202357,
+      "val_boundary_f1": 0.9766231394233652,
+      "val_exact_seg": 0.487,
+      "val_n": 2000
+    },
+    {
+      "epoch": 5,
+      "loss": 0.06657632066545262,
+      "val_boundary_f1": 0.979859906824002,
+      "val_exact_seg": 0.5355,
+      "val_n": 2000
+    },
+    {
+      "epoch": 6,
+      "loss": 0.0597036739090075,
+      "val_boundary_f1": 0.9821018897654286,
+      "val_exact_seg": 0.561,
+      "val_n": 2000
+    }
+  ],
+  "limit": 0,
+  "val_size": 2000
 }

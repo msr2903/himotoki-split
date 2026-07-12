@@ -47,6 +47,34 @@ def test_default_model_if_present():
     assert result.source == "model"
 
 
+def test_default_onnx_if_present():
+    onnx = ROOT / "himotoki_split" / "models" / "default.onnx"
+    if not onnx.is_file():
+        pytest.skip("default.onnx not packaged yet")
+    pytest.importorskip("onnxruntime")
+    reset_model_cache()
+    result = split("今日は天気がいい", fallback=False)
+    assert "".join(result.segments) == "今日は天気がいい"
+    assert result.source == "model"
+    # Prefer ONNX when packaged (split() loads default.onnx first)
+    from himotoki_split.split import _get_model
+
+    reset_model_cache()
+    model = _get_model()
+    assert type(model).__name__ == "OnnxBoundaryModel"
+
+
+def test_onnx_model_path(trained_model):
+    onnx = ROOT / "himotoki_split" / "models" / "default.onnx"
+    if not onnx.is_file():
+        pytest.skip("default.onnx not packaged yet")
+    pytest.importorskip("onnxruntime")
+    reset_model_cache()
+    result = split("猫が食べる", model_path=onnx, fallback=False)
+    assert "".join(result.segments) == "猫が食べる"
+    assert result.source == "model"
+
+
 def test_train_f1_reasonable(trained_model):
     from himotoki_split.model import load_jsonl_dataset, load_model
 

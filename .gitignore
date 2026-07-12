@@ -15,6 +15,7 @@ venv/
 data/labels.jsonl
 data/labels/train.jsonl
 data/labels/holdout.jsonl
+!data/labels/holdout_clean.jsonl
 data/labels/shards/
 data/labels/raw*.jsonl
 data/corpus/

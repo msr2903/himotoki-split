@@ -1,0 +1,110 @@
+{
+  "backend": "onnx",
+  "model": "himotoki_split/models/default.onnx",
+  "holdout": "data/labels/holdout.jsonl",
+  "n": 5000,
+  "himotoki_available": true,
+  "max_teacher_rate": 0.3,
+  "model_only_exact_seg": 0.419,
+  "sweep": [
+    {
+      "min_confidence": 0.5,
+      "exact_seg": 0.419,
+      "exact_count": 2095,
+      "teacher_call_rate": 0.0,
+      "teacher_calls": 0
+    },
+    {
+      "min_confidence": 0.55,
+      "exact_seg": 0.419,
+      "exact_count": 2095,
+      "teacher_call_rate": 0.0,
+      "teacher_calls": 0
+    },
+    {
+      "min_confidence": 0.6,
+      "exact_seg": 0.419,
+      "exact_count": 2095,
+      "teacher_call_rate": 0.0,
+      "teacher_calls": 0
+    },
+    {
+      "min_confidence": 0.65,
+      "exact_seg": 0.419,
+      "exact_count": 2095,
+      "teacher_call_rate": 0.0,
+      "teacher_calls": 0
+    },
+    {
+      "min_confidence": 0.7,
+      "exact_seg": 0.419,
+      "exact_count": 2095,
+      "teacher_call_rate": 0.0,
+      "teacher_calls": 0
+    },
+    {
+      "min_confidence": 0.75,
+      "exact_seg": 0.419,
+      "exact_count": 2095,
+      "teacher_call_rate": 0.0,
+      "teacher_calls": 0
+    },
+    {
+      "min_confidence": 0.8,
+      "exact_seg": 0.419,
+      "exact_count": 2095,
+      "teacher_call_rate": 0.0,
+      "teacher_calls": 0
+    },
+    {
+      "min_confidence": 0.85,
+      "exact_seg": 0.4192,
+      "exact_count": 2096,
+      "teacher_call_rate": 0.0002,
+      "teacher_calls": 1
+    },
+    {
+      "min_confidence": 0.9,
+      "exact_seg": 0.4208,
+      "exact_count": 2104,
+      "teacher_call_rate": 0.002,
+      "teacher_calls": 10
+    },
+    {
+      "min_confidence": 0.92,
+      "exact_seg": 0.4234,
+      "exact_count": 2117,
+      "teacher_call_rate": 0.0058,
+      "teacher_calls": 29
+    },
+    {
+      "min_confidence": 0.94,
+      "exact_seg": 0.438,
+      "exact_count": 2190,
+      "teacher_call_rate": 0.0308,
+      "teacher_calls": 154
+    },
+    {
+      "min_confidence": 0.96,
+      "exact_seg": 0.4822,
+      "exact_count": 2411,
+      "teacher_call_rate": 0.1422,
+      "teacher_calls": 711
+    },
+    {
+      "min_confidence": 0.98,
+      "exact_seg": 0.5264,
+      "exact_count": 2632,
+      "teacher_call_rate": 0.5232,
+      "teacher_calls": 2616
+    }
+  ],
+  "recommended_min_confidence": 0.96,
+  "recommended": {
+    "min_confidence": 0.96,
+    "exact_seg": 0.4822,
+    "exact_count": 2411,
+    "teacher_call_rate": 0.1422,
+    "teacher_calls": 711
+  }
+}

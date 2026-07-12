@@ -37,6 +37,9 @@ himotoki-split "猫が食べる"
 himotoki-split --json "猫が食べる"
 ```
 
+`split()` prefers packaged `default.onnx` when `onnxruntime` is installed, otherwise `default.npz`.  
+Default hybrid fallback threshold is **`min_confidence=0.96`** (Phase B calibration).
+
 ## Scale silver labels (Wikipedia → Himotoki → train)
 
 Large dumps stay **local** (gitignored). Wikipedia text is **CC BY-SA**.
@@ -71,16 +74,44 @@ python scripts/eval_model.py -m himotoki_split/models/default.npz -i data/labels
 
 Rough cost: wiki extract is large (multi-GB download if using full articles dump); labeling ~20–100 ms/sentence ⇒ **100k ≈ a few hours** single-threaded (faster with shards).
 
-### Phase B — 500k + neural ONNX student
+### Phase B — full-data neural ONNX student
+
+Trained BiLSTM on the **full ~95k** silver train set (6 epochs, CPU) and shipped `default.onnx`.
+
+```bash
+# Train ONNX student on full train.jsonl
+python scripts/train_neural.py -i data/labels/train.jsonl \
+  -o himotoki_split/models/default.onnx --epochs 6 --batch-size 64 --device cpu
+
+# Clean eval slice + dual metrics
+python scripts/make_clean_eval.py
+python scripts/eval_phase_b.py
+
+# Calibrate hybrid fallback (needs Himotoki DB)
+python scripts/calibrate_fallback.py -m himotoki_split/models/default.onnx
+```
+
+**Holdout results (frozen 5k wiki silver):**
+
+| Backend | Boundary F1 | Exact-seg |
+|---------|-------------|-----------|
+| Linear `default.npz` (30k subset) | 0.917 | 10.6% |
+| ONNX `default.onnx` (full 95k) | **0.970** | **41.9%** |
+
+**Clean slice (800 sentences):** ONNX F1 **0.972**, exact-seg **45.3%**.
+
+Hybrid fallback at `min_confidence=0.96`: exact-seg **48.2%** with ~**14%** Himotoki calls.
+
+Optional later growth (append-only train, freeze holdout):
 
 ```bash
 python scripts/build_corpus.py --download --target 500000 -o data/corpus/sentences.txt
-# ... dump + merge as above ...
-python scripts/train_neural.py -i data/labels/train.jsonl -o himotoki_split/models/default.onnx --epochs 5
-python scripts/eval_model.py -m himotoki_split/models/default.onnx -i data/labels/holdout.jsonl --backend onnx
+# ... dump shards ...
+python scripts/merge_labels.py -i data/labels/shards/*.jsonl \
+  --freeze-holdout data/labels/holdout.jsonl \
+  --train-out data/labels/train.jsonl --holdout-out data/labels/holdout.jsonl
+python scripts/train_neural.py -i data/labels/train.jsonl -o himotoki_split/models/default.onnx
 ```
-
-`split()` prefers `default.onnx` when present (and onnxruntime is installed), otherwise `default.npz`.
 
 ## Small-scale distill (existing)
 
@@ -89,19 +120,15 @@ python scripts/dump_labels.py -i data/sample_sentences.txt -o data/labels.jsonl
 python scripts/train.py -i data/labels.jsonl -o himotoki_split/models/default.npz
 ```
 
-Shipped `default.npz` after Phase A: trained on a **30k** subset of ~**95k**
-Himotoki-labeled Wikipedia sentences (100k corpus → 99,997 labels → 5k holdout).
-Holdout boundary F1 ≈ **0.92**, exact-seg ≈ **10%** on noisy wiki text.
-Optional `default.onnx` (BiLSTM) is included as a Phase B starter (~0.89 F1 on same holdout after a 5k smoke train).
-
-Large artifacts (`data/corpus/`, `data/labels/train.jsonl`, wiki dumps) are **gitignored**.
+Large artifacts (`data/corpus/`, `data/labels/train.jsonl`, wiki dumps) are **gitignored**.  
+`data/labels/holdout_clean.jsonl` is kept in-repo for reproducible clean eval.
 
 ## Design
 
-- **Teacher:** Himotoki `segment_text` top path → `{text, segments}` JSONL  
-- **Student (default):** logistic regression + Viterbi (`default.npz`, numpy)  
-- **Student (optional):** char BiLSTM → ONNX  
-- **Fallback:** low-confidence → Himotoki if installed  
+- **Teacher:** Himotoki analyze top path → `{text, segments}` JSONL  
+- **Student (default runtime):** char BiLSTM → ONNX (`default.onnx`) when onnxruntime is available  
+- **Student (zero-deps fallback):** logistic + Viterbi (`default.npz`, numpy)  
+- **Fallback:** low-confidence → Himotoki if installed (`min_confidence=0.96`)  
 
 ## Relationship to Himotoki
 

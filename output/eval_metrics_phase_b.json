@@ -1,0 +1,44 @@
+{
+  "linear": {
+    "backend": "linear",
+    "model": "himotoki_split/models/default.npz",
+    "holdout": "data/labels/holdout.jsonl",
+    "n": 5000,
+    "boundary_f1": 0.9169354301655832,
+    "exact_seg": 0.1056,
+    "mean_confidence": 0.912610726416111,
+    "exact_count": 528,
+    "clean_holdout": "data/labels/holdout_clean.jsonl",
+    "clean": {
+      "n": 800,
+      "boundary_f1": 0.9193540262231875,
+      "exact_seg": 0.1225,
+      "mean_confidence": 0.9117784021794796,
+      "exact_count": 98
+    }
+  },
+  "onnx": {
+    "backend": "onnx",
+    "model": "himotoki_split/models/default.onnx",
+    "holdout": "data/labels/holdout.jsonl",
+    "n": 5000,
+    "boundary_f1": 0.9701264038615848,
+    "exact_seg": 0.419,
+    "mean_confidence": 0.976350416970253,
+    "exact_count": 2095,
+    "clean_holdout": "data/labels/holdout_clean.jsonl",
+    "clean": {
+      "n": 800,
+      "boundary_f1": 0.9715210991804767,
+      "exact_seg": 0.4525,
+      "mean_confidence": 0.9761733279377222,
+      "exact_count": 362
+    }
+  },
+  "prefer_runtime": "onnx",
+  "success_bar": {
+    "exact_seg_ge_0_20": true,
+    "boundary_f1_ge_0_94": true,
+    "met": true
+  }
+}

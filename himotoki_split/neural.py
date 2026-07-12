@@ -8,7 +8,13 @@ from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
-from himotoki_split.labels import LABEL_B, LABEL_I, bio_to_segments, segments_to_bio
+from himotoki_split.labels import (
+    LABEL_B,
+    LABEL_I,
+    bio_to_segments,
+    boundary_f1,
+    segments_to_bio,
+)
 
 PathLike = Union[str, Path]
 
@@ -88,6 +94,46 @@ class OnnxBoundaryModel:
         )
 
 
+def _eval_torch_model(
+    model,
+    texts: Sequence[str],
+    segments_list: Sequence[Sequence[str]],
+    device: str,
+) -> dict:
+    """Quick boundary F1 / exact-seg on a torch model (no ONNX)."""
+    import torch
+
+    model.eval()
+    f1s: List[float] = []
+    exact = 0
+    with torch.no_grad():
+        for text, gold_segs in zip(texts, segments_list):
+            if not text:
+                continue
+            ids = torch.tensor(encode_text(text), dtype=torch.long, device=device)[
+                None, :
+            ]
+            logits = model(ids)[0].detach().cpu().numpy()
+            m = logits.max(axis=-1, keepdims=True)
+            exp = np.exp(logits - m)
+            prob = exp / exp.sum(axis=-1, keepdims=True)
+            p_b = prob[:, LABEL_B]
+            labels = [
+                LABEL_B if (i == 0 or p >= 0.5) else LABEL_I for i, p in enumerate(p_b)
+            ]
+            labels[0] = LABEL_B
+            gold = segments_to_bio(text, gold_segs)
+            f1s.append(boundary_f1(gold, labels)[2])
+            if bio_to_segments(text, labels) == list(gold_segs):
+                exact += 1
+    n = max(len(f1s), 1)
+    return {
+        "boundary_f1": sum(f1s) / n,
+        "exact_seg": exact / n,
+        "n": len(f1s),
+    }
+
+
 def train_bilstm_and_export(
     texts: Sequence[str],
     segments_list: Sequence[Sequence[str]],
@@ -99,6 +145,9 @@ def train_bilstm_and_export(
     emb_dim: int = 64,
     hidden: int = 128,
     device: str = "cpu",
+    val_texts: Optional[Sequence[str]] = None,
+    val_segments: Optional[Sequence[Sequence[str]]] = None,
+    max_len: int = 256,
 ) -> dict:
     """Train a tiny BiLSTM tagger with PyTorch and export ONNX."""
     try:
@@ -111,8 +160,18 @@ def train_bilstm_and_export(
         ) from exc
 
     labels = [segments_to_bio(t, s) for t, s in zip(texts, segments_list)]
-    xs = [torch.tensor(encode_text(t), dtype=torch.long) for t in texts]
-    ys = [torch.tensor(lab, dtype=torch.long) for lab in labels]
+    xs = []
+    ys = []
+    for t, lab in zip(texts, labels):
+        ids = encode_text(t)
+        if ids.size == 0:
+            continue
+        if max_len > 0 and ids.size > max_len:
+            ids = ids[:max_len]
+            lab = lab[:max_len]
+            lab[0] = LABEL_B
+        xs.append(torch.tensor(ids, dtype=torch.long))
+        ys.append(torch.tensor(lab, dtype=torch.long))
 
     class CharBiLSTM(nn.Module):
         def __init__(self) -> None:
@@ -138,6 +197,7 @@ def train_bilstm_and_export(
     loss_fn = nn.CrossEntropyLoss(ignore_index=-100)
 
     idx = list(range(len(xs)))
+    epoch_logs: List[dict] = []
 
     def batches():
         import random
@@ -151,8 +211,8 @@ def train_bilstm_and_export(
             padded_y = pad_sequence(labs, batch_first=True, padding_value=-100)
             yield padded.to(device), padded_y.to(device)
 
-    model.train()
     for epoch in range(epochs):
+        model.train()
         total = 0.0
         n = 0
         for padded, padded_y in batches():
@@ -163,7 +223,19 @@ def train_bilstm_and_export(
             opt.step()
             total += float(loss.item())
             n += 1
-        print(f"epoch {epoch+1}/{epochs} loss={total / max(n, 1):.4f}")
+        avg_loss = total / max(n, 1)
+        log = {"epoch": epoch + 1, "loss": avg_loss}
+        if val_texts is not None and val_segments is not None and len(val_texts) > 0:
+            val_metrics = _eval_torch_model(model, val_texts, val_segments, device)
+            log.update({f"val_{k}": v for k, v in val_metrics.items()})
+            print(
+                f"epoch {epoch+1}/{epochs} loss={avg_loss:.4f} "
+                f"val_f1={val_metrics['boundary_f1']:.4f} "
+                f"val_exact={val_metrics['exact_seg']:.4f}"
+            )
+        else:
+            print(f"epoch {epoch+1}/{epochs} loss={avg_loss:.4f}")
+        epoch_logs.append(log)
 
     # Export ONNX with dynamic sequence length (batch=1)
     model.eval()
@@ -189,6 +261,9 @@ def train_bilstm_and_export(
         "onnx_path": str(onnx_path),
         "n_sentences": len(texts),
         "epochs": epochs,
+        "batch_size": batch_size,
         "emb_dim": emb_dim,
         "hidden": hidden,
+        "max_len": max_len,
+        "epoch_logs": epoch_logs,
     }

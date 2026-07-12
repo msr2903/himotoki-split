@@ -55,7 +55,7 @@ def split(
     *,
     model_path: Optional[PathLike] = None,
     fallback: bool = True,
-    min_confidence: float = 0.55,
+    min_confidence: float = 0.96,
 ) -> SplitResult:
     """Split Japanese text into word-like surface segments.
 
@@ -64,6 +64,8 @@ def split(
         model_path: Optional path to a ``.npz`` or ``.onnx`` boundary model.
         fallback: If True and confidence < ``min_confidence``, try Himotoki.
         min_confidence: Threshold for accepting the distilled model output.
+            Default 0.96 from Phase B holdout calibration (≈14% teacher calls,
+            hybrid exact-seg ≈0.48 vs model-only ≈0.42).
     """
     if not text:
         return SplitResult(

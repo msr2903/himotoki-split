@@ -26,8 +26,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--min-confidence",
         type=float,
-        default=0.55,
-        help="Fallback threshold (default: 0.55)",
+        default=0.96,
+        help="Fallback threshold (default: 0.96, Phase B calibrated)",
     )
     parser.add_argument(
         "--json",
